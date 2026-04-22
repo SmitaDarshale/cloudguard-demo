@@ -183,7 +183,9 @@ This project was built to demonstrate practical cloud and security knowledge, no
 
 ## About the Developer
 
-**Smita Darshale** is a Cloud Infrastructure Engineer with 10+ years of experience across AWS, Oracle Cloud Infrastructure (OCI), and Azure. She has hands-on experience in cloud security hardening, HIPAA-compliant healthcare environments, large-scale cloud migrations, infrastructure automation with Terraform and Kubernetes, and production observability with Grafana, Splunk, and Dynatrace.
+**Smita Darshale** Software Engineer at Oracle, I contribute to enhancing system security and stability through vulnerability management and cloud infrastructure solutions. My work includes identifying and resolving CVEs, analyzing dependencies, upgrading vulnerable components, and ensuring compliance through security scans using tools like Twistlock. My focus extends to building and maintaining scalable systems that prioritize security and reliability. 
+
+At Oracle, I support production by troubleshooting issues using tools like Hadoop workflows and Splunk logs, while addressing incidents and ensuring smooth service operation. My expertise includes developing Java-based microservices, contributing to public APIs, and designing infrastructure with Terraform for deployment on cloud environments like Oracle Cloud Infrastructure (OCI). My commitment lies in improving system security, enabling clean architecture, and fostering innovation through continuous learning.
 
 - Email: smita.darshale@gmail.com
 - Phone: +1-913-244-6313

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TENEX CloudGuard — AWS Security Command Center</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f6f9;color:#1a1a1a;min-height:100vh;}
+.topbar{background:#070C1F;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;}
+.topbar-logo{font-size:18px;font-weight:600;color:#fff;letter-spacing:-0.3px;}
+.topbar-logo span{color:#4a9eff;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.live-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:#aab;border:1px solid rgba(255,255,255,0.15);border-radius:20px;padding:5px 12px;}
+.pulse{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.topbar-user{font-size:13px;color:#aab;}
+.container{max-width:1280px;margin:0 auto;padding:24px 32px;}
+.page-title{font-size:14px;color:#6b7280;margin-bottom:20px;font-weight:400;}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.metric{background:#fff;border-radius:10px;padding:18px 20px;border:1px solid #e5e7eb;}
+.metric-label{font-size:11px;color:#6b7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.6px;}
+.metric-value{font-size:26px;font-weight:600;color:#1a1a1a;}
+.metric-value.danger{color:#dc2626;}
+.metric-value.warn{color:#d97706;}
+.metric-value.ok{color:#16a34a;}
+.metric-sub{font-size:11px;color:#9ca3af;margin-top:4px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.panel{background:#fff;border-radius:10px;border:1px solid #e5e7eb;padding:18px 20px;}
+.panel-title{font-size:13px;font-weight:600;color:#374151;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.panel-title-badge{font-size:11px;font-weight:400;color:#9ca3af;}
+.alert-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;}
+.alert-list::-webkit-scrollbar{width:4px;}
+.alert-list::-webkit-scrollbar-track{background:#f1f1f1;}
+.alert-list::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px;}
+.alert-item{border:1px solid #e5e7eb;border-radius:8px;padding:10px 14px;cursor:pointer;transition:all 0.15s;}
+.alert-item:hover{border-color:#93c5fd;background:#f8faff;}
+.alert-item.selected{border-color:#2563eb;border-width:1.5px;background:#eff6ff;}
+.alert-header{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.sev-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;}
+.sev-critical{background:#fee2e2;color:#991b1b;}
+.sev-high{background:#fef3c7;color:#92400e;}
+.sev-medium{background:#dbeafe;color:#1e40af;}
+.sev-low{background:#dcfce7;color:#166534;}
+.alert-name{font-size:13px;font-weight:500;color:#111827;}
+.alert-meta{font-size:11px;color:#9ca3af;display:flex;gap:12px;}
+.filter-row{display:flex;gap:6px;}
+.filter-btn{font-size:11px;padding:3px 10px;border-radius:20px;border:1px solid #e5e7eb;background:transparent;color:#6b7280;cursor:pointer;transition:all 0.15s;}
+.filter-btn:hover{border-color:#93c5fd;color:#2563eb;}
+.filter-btn.active{background:#2563eb;color:#fff;border-color:#2563eb;}
+.triage-panel{background:#fff;border-radius:10px;border:1px solid #e5e7eb;padding:18px 20px;margin-bottom:20px;}
+.triage-empty{text-align:center;padding:2.5rem;color:#9ca3af;font-size:13px;}
+.triage-empty-icon{font-size:32px;margin-bottom:10px;}
+.triage-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
+.triage-title{font-size:16px;font-weight:600;color:#111827;}
+.triage-src{font-size:12px;color:#9ca3af;margin-top:4px;}
+.score-ring{display:flex;flex-direction:column;align-items:center;min-width:80px;}
+.score-num{font-size:32px;font-weight:700;}
+.score-label{font-size:10px;color:#9ca3af;text-align:center;margin-top:2px;}
+.factors{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.factor{background:#f9fafb;border-radius:8px;padding:10px 12px;}
+.factor-name{font-size:11px;color:#6b7280;margin-bottom:6px;text-transform:capitalize;}
+.factor-bar-track{height:5px;background:#e5e7eb;border-radius:3px;overflow:hidden;}
+.factor-bar{height:5px;border-radius:3px;transition:width 0.4s;}
+.factor-val{font-size:13px;font-weight:600;color:#111827;margin-top:5px;}
+.recommendation{background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#1e40af;line-height:1.6;}
+.recommendation strong{font-weight:600;color:#1e3a8a;}
+.actions{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid #e5e7eb;background:#fff;color:#374151;transition:all 0.15s;}
+.btn:hover{background:#f9fafb;border-color:#d1d5db;}
+.btn-primary{background:#2563eb;color:#fff;border-color:#2563eb;}
+.btn-primary:hover{background:#1d4ed8;}
+.btn-danger{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
+.btn-danger:hover{background:#fecaca;}
+.chart-section{background:#fff;border-radius:10px;border:1px solid #e5e7eb;padding:18px 20px;margin-bottom:20px;}
+.two-charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.status-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:#6b7280;flex-wrap:wrap;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+.footer{text-align:center;padding:24px;font-size:12px;color:#9ca3af;border-top:1px solid #e5e7eb;margin-top:8px;}
+.footer a{color:#2563eb;text-decoration:none;}
+.toast{position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 20px;border-radius:8px;font-size:13px;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:999;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">TENEX<span>.ai</span> &nbsp;<span style="font-size:13px;font-weight:400;color:#6b7c99;">CloudGuard — AWS Security Command Center</span></div>
+  <div class="topbar-right">
+    <div class="live-badge"><div class="pulse"></div>Live monitoring</div>
+    <div class="topbar-user">Demo by Smita Darshale</div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-title">Dashboard &rsaquo; AWS Security Operations &rsaquo; Command Center</div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total alerts</div>
+      <div class="metric-value">12</div>
+      <div class="metric-sub">Last 24 hours</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Critical / High</div>
+      <div class="metric-value danger">4</div>
+      <div class="metric-sub">Needs immediate action</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Avg triage time</div>
+      <div class="metric-value ok">1m 42s</div>
+      <div class="metric-sub">vs industry avg 38 min</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">False positives</div>
+      <div class="metric-value ok">2%</div>
+      <div class="metric-sub">98% eliminated by AI</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">
+        Incoming alerts
+        <div class="filter-row">
+          <button class="filter-btn active" onclick="filterAlerts('all',this)">All</button>
+          <button class="filter-btn" onclick="filterAlerts('critical',this)">Critical</button>
+          <button class="filter-btn" onclick="filterAlerts('high',this)">High</button>
+          <button class="filter-btn" onclick="filterAlerts('medium',this)">Medium</button>
+        </div>
+      </div>
+      <div class="alert-list" id="alert-list"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Alert volume <span class="panel-title-badge">24 hours</span></div>
+      <div style="position:relative;height:260px;">
+        <canvas id="volumeChart" role="img" aria-label="Bar chart of alert volume by hour over the last 24 hours">Alert volume peaks during business hours with critical alerts spiking mid-morning.</canvas>
+      </div>
+      <div class="status-row">
+        <span class="dot" style="background:#2563eb;"></span><span>Total alerts/hr</span>
+        <span class="dot" style="background:#dc2626;margin-left:8px;"></span><span>Critical alerts</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="triage-panel">
+    <div class="panel-title" style="margin-bottom:6px;">
+      AI triage engine
+      <span class="panel-title-badge">Powered by domain-specific threat intelligence</span>
+    </div>
+    <div id="triage-content">
+      <div class="triage-empty">
+        <div class="triage-empty-icon">&#128268;</div>
+        <div>Click any alert to run AI triage analysis</div>
+        <div style="font-size:12px;margin-top:6px;color:#d1d5db;">Scores by likelihood, impact, exposure &amp; velocity</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-charts">
+    <div class="chart-section">
+      <div class="panel-title">Threat category breakdown <span class="panel-title-badge">Last 7 days</span></div>
+      <div style="position:relative;height:220px;">
+        <canvas id="catChart" role="img" aria-label="Horizontal bar chart of threat categories. IAM Anomaly leads at 34%, followed by Network Intrusion 27%, Data Exfiltration 18%, Malware 13%, Config Drift 8%.">IAM Anomaly 34%, Network Intrusion 27%, Data Exfiltration 18%, Malware 13%, Config Drift 8%.</canvas>
+      </div>
+    </div>
+    <div class="chart-section">
+      <div class="panel-title">Alert severity trend <span class="panel-title-badge">Last 7 days</span></div>
+      <div style="position:relative;height:220px;">
+        <canvas id="trendChart" role="img" aria-label="Line chart showing daily alert severity trends over 7 days for critical, high, and medium alerts.">Critical alerts trending downward while medium alerts remain stable.</canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built by <strong>Smita Darshale</strong> &mdash; Cloud Infrastructure Engineer &mdash;
+    <a href="https://www.linkedin.com/in/darshalesmita" target="_blank">linkedin.com/in/darshalesmita</a>
+    &nbsp;|&nbsp; Demo project inspired by <a href="https://tenex.ai" target="_blank">TENEX.ai</a>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const alerts = [
+  {id:1,name:"IAM privilege escalation",sev:"critical",source:"AWS CloudTrail",region:"us-east-1",time:"2m ago",score:94,factors:{likelihood:92,impact:96,exposure:88,velocity:90},rec:"Root-level IAM policy attached to non-admin user. Immediate role revocation recommended. Correlates with 3 prior failed MFA attempts from the same user in the past 6 hours.",action:"Revoke IAM Role"},
+  {id:2,name:"Unusual S3 data exfiltration",sev:"critical",source:"AWS GuardDuty",region:"us-west-2",time:"7m ago",score:91,factors:{likelihood:88,impact:95,exposure:90,velocity:85},rec:"Large volume of S3 GetObject calls from unrecognized external IP 203.0.113.42. Data exfiltration pattern detected across 3 buckets. Block IP and audit bucket policies immediately.",action:"Block & Isolate"},
+  {id:3,name:"EC2 cryptomining detected",sev:"high",source:"AWS GuardDuty",region:"eu-west-1",time:"14m ago",score:78,factors:{likelihood:82,impact:70,exposure:75,velocity:80},rec:"Unusual CPU spike (98%) and outbound traffic to known mining pool endpoints on EC2 instance i-0abc123def. Snapshot for forensics, then terminate the instance.",action:"Terminate Instance"},
+  {id:4,name:"CloudTrail logging disabled",sev:"high",source:"AWS CloudTrail",region:"us-east-1",time:"22m ago",score:80,factors:{likelihood:85,impact:80,exposure:78,velocity:72},rec:"CloudTrail logging was disabled in us-east-1 for 4 minutes — a known attacker evasion technique to obscure malicious activity. Re-enable immediately and audit all events from the gap window.",action:"Re-enable & Audit"},
+  {id:5,name:"Security group SSH open",sev:"high",source:"AWS Config",region:"us-east-2",time:"35m ago",score:72,factors:{likelihood:70,impact:75,exposure:80,velocity:55},rec:"Security group sg-0def456 exposes SSH (port 22) to 0.0.0.0/0 — the entire internet. Restrict ingress to known CIDR ranges or VPN IP only. This violates CIS AWS Benchmark 4.1.",action:"Remediate Config"},
+  {id:6,name:"VPC flow log anomaly",sev:"medium",source:"AWS VPC Flow",region:"us-east-1",time:"48m ago",score:54,factors:{likelihood:60,impact:55,exposure:50,velocity:48},rec:"Unusual lateral movement traffic pattern detected within private subnet 10.0.1.0/24. Review EC2-to-EC2 traffic. May indicate internal reconnaissance or compromised instance.",action:"Investigate"},
+  {id:7,name:"GuardDuty: port scan",sev:"medium",source:"AWS GuardDuty",region:"ap-southeast-1",time:"1h ago",score:48,factors:{likelihood:55,impact:45,exposure:50,velocity:40},rec:"Sequential port scanning from external IP 198.51.100.77 targeting 3 EC2 instances over 8 minutes. Add to network ACL deny list. Monitor for follow-up intrusion attempts.",action:"Add to Blocklist"},
+  {id:8,name:"Root account login detected",sev:"medium",source:"AWS CloudTrail",region:"us-east-1",time:"2h ago",score:60,factors:{likelihood:65,impact:70,exposure:55,velocity:45},rec:"AWS root account login detected — root usage is strongly discouraged outside break-glass scenarios. Verify with the account owner immediately. Enable MFA on root if not already set.",action:"Verify & Alert"},
+  {id:9,name:"Unused IAM access key",sev:"low",source:"AWS IAM",region:"global",time:"3h ago",score:28,factors:{likelihood:30,impact:35,exposure:25,velocity:20},rec:"IAM access key AKIA...XYZ has not been used in 90+ days. Rotate or deactivate to reduce the attack surface. Low urgency but part of continuous security hygiene.",action:"Rotate Key"},
+];
+
+let selected = null;
+let filterMode = 'all';
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+function filterAlerts(mode, btn) {
+  filterMode = mode;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAlerts();
+}
+
+function renderAlerts() {
+  const list = document.getElementById('alert-list');
+  const filtered = filterMode==='all' ? alerts : alerts.filter(a=>a.sev===filterMode);
+  list.innerHTML = filtered.map(a=>`
+    <div class="alert-item${selected&&selected.id===a.id?' selected':''}" onclick="selectAlert(${a.id})">
+      <div class="alert-header">
+        <span class="sev-badge sev-${a.sev}">${a.sev.toUpperCase()}</span>
+        <span class="alert-name">${a.name}</span>
+      </div>
+      <div class="alert-meta">
+        <span>${a.source}</span><span>${a.region}</span><span>${a.time}</span>
+      </div>
+    </div>`).join('');
+}
+
+function scoreColor(v) {
+  if(v>=85) return '#dc2626';
+  if(v>=65) return '#d97706';
+  if(v>=45) return '#2563eb';
+  return '#16a34a';
+}
+
+function selectAlert(id) {
+  selected = alerts.find(a=>a.id===id);
+  renderAlerts();
+  const f = selected.factors;
+  document.getElementById('triage-content').innerHTML = `
+    <div class="triage-header">
+      <div>
+        <div class="triage-title">${selected.name}</div>
+        <div class="triage-src">${selected.source} &nbsp;&bull;&nbsp; ${selected.region} &nbsp;&bull;&nbsp; ${selected.time}</div>
+      </div>
+      <div class="score-ring">
+        <div class="score-num" style="color:${scoreColor(selected.score)}">${selected.score}</div>
+        <div class="score-label">Risk score / 100</div>
+      </div>
+    </div>
+    <div class="factors">
+      ${['likelihood','impact','exposure','velocity'].map(k=>`
+        <div class="factor">
+          <div class="factor-name">${k}</div>
+          <div class="factor-bar-track"><div class="factor-bar" style="width:${f[k]}%;background:${scoreColor(f[k])};"></div></div>
+          <div class="factor-val">${f[k]}/100</div>
+        </div>`).join('')}
+    </div>
+    <div class="recommendation"><strong>AI recommendation:</strong> ${selected.rec}</div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="showToast('Action dispatched: ${selected.action}')">${selected.action}</button>
+      <button class="btn" onclick="showToast('Alert assigned to on-call analyst')">Assign to analyst</button>
+      <button class="btn btn-danger" onclick="showToast('Marked as false positive and dismissed')">Dismiss as false positive</button>
+    </div>`;
+}
+
+renderAlerts();
+
+const hours = Array.from({length:24},(_,i)=>{
+  const h = (new Date().getHours()-23+i+24)%24;
+  return h+':00';
+});
+const vols = [1,0,2,1,0,1,3,5,8,11,9,13,10,12,8,7,11,9,6,8,5,4,3,2];
+const crits = [0,0,1,0,0,0,1,2,3,4,2,5,3,4,2,1,4,3,1,2,1,1,0,0];
+
+new Chart(document.getElementById('volumeChart'),{
+  type:'bar',
+  data:{
+    labels:hours,
+    datasets:[
+      {label:'Alerts/hr',data:vols,backgroundColor:'rgba(37,99,235,0.4)',borderColor:'#2563eb',borderWidth:1,borderRadius:2},
+      {label:'Critical',data:crits,backgroundColor:'rgba(220,38,38,0.5)',borderColor:'#dc2626',borderWidth:1,borderRadius:2}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:10},maxRotation:45,autoSkip:true,maxTicksLimit:8},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:10}}}}}
+});
+
+new Chart(document.getElementById('catChart'),{
+  type:'bar',
+  data:{
+    labels:['IAM Anomaly','Network Intrusion','Data Exfiltration','Malware','Config Drift'],
+    datasets:[{data:[34,27,18,13,8],backgroundColor:['#dc2626','#d97706','#2563eb','#7c3aed','#0f766e'],borderWidth:0,borderRadius:4}]
+  },
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{callback:v=>v+'%',font:{size:11}},grid:{color:'rgba(0,0,0,0.05)'}},y:{ticks:{font:{size:11}},grid:{display:false}}}}
+});
+
+const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+new Chart(document.getElementById('trendChart'),{
+  type:'line',
+  data:{
+    labels:days,
+    datasets:[
+      {label:'Critical',data:[5,7,4,8,6,3,4],borderColor:'#dc2626',backgroundColor:'rgba(220,38,38,0.08)',tension:0.4,pointRadius:4,fill:true},
+      {label:'High',data:[9,11,8,13,10,7,9],borderColor:'#d97706',backgroundColor:'rgba(217,119,6,0.06)',tension:0.4,pointRadius:4,fill:true},
+      {label:'Medium',data:[12,10,14,11,13,9,11],borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.06)',tension:0.4,pointRadius:4,fill:true}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{size:11}},grid:{display:false}},y:{beginAtZero:true,ticks:{font:{size:11}}}}}
+});
+</script>
+</body>
+</html>
